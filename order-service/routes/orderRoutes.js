@@ -7,6 +7,53 @@ const { publishToQueue } = require('../app');
 
 const router = express.Router();
 
+// CREATE ticket — admin only
+router.post('/ticket', async (req, res) => {
+    try {
+        const { event_name, price, stock } = req.body;
+        if (!event_name || !price || !stock) {
+            return res.status(400).json({ success: false, message: 'event_name, price, stock wajib diisi' });
+        }
+        const ticket = await Ticket.create({ event_name, price, stock });
+        res.status(201).json({ success: true, message: 'Tiket berhasil dibuat', data: { id: ticket.insertId } });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// READ all tickets — public
+router.get('/tickets', async (req, res) => {
+    try {
+        const tickets = await Ticket.findAll();
+        res.json({ success: true, data: tickets });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// UPDATE ticket — admin only
+router.put('/ticket/:id', async (req, res) => {
+    try {
+        const { event_name, price, stock } = req.body;
+        const result = await Ticket.update(req.params.id, { event_name, price, stock });
+        if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'Tiket tidak ditemukan' });
+        res.json({ success: true, message: 'Tiket berhasil diupdate' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// DELETE ticket — admin only
+router.delete('/ticket/:id', async (req, res) => {
+    try {
+        const result = await Ticket.delete(req.params.id);
+        if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'Tiket tidak ditemukan' });
+        res.json({ success: true, message: 'Tiket berhasil dihapus' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 router.get('/orders', async (req, res) => {
     try {
         const orders = await Order.findAll();

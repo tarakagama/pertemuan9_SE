@@ -61,4 +61,44 @@ router.delete('/:id', protect(['admin']), async (req, res) => {
     }
 });
 
+// GET semua tiket — public (tidak perlu token)
+router.get('/tickets', async (req, res) => {
+    try {
+        const response = await axios.get(`${ORDER_URL}/tickets`);
+        res.json(response.data);
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Gagal mengambil tiket' });
+    }
+});
+
+// POST buat tiket — admin only
+router.post('/ticket', protect(['admin']), async (req, res) => {
+    try {
+        const response = await axios.post(`${ORDER_URL}/ticket`, req.body);
+        res.status(201).json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json({ success: false, message: 'Gagal membuat tiket' });
+    }
+});
+
+// PUT update tiket — admin only
+router.put('/ticket/:id', protect(['admin']), async (req, res) => {
+    try {
+        const response = await axios.put(`${ORDER_URL}/ticket/${req.params.id}`, req.body);
+        res.json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json({ success: false, message: 'Gagal update tiket' });
+    }
+});
+
+// DELETE tiket — admin only
+router.delete('/ticket/:id', protect(['admin']), async (req, res) => {
+    try {
+        const response = await axios.delete(`${ORDER_URL}/ticket/${req.params.id}`);
+        res.json(response.data);
+    } catch (err) {
+        res.status(err.response?.status || 500).json({ success: false, message: 'Gagal hapus tiket' });
+    }
+});
+
 module.exports = router;
