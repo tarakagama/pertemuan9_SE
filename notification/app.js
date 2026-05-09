@@ -1,25 +1,9 @@
-const amqp = require('amqplib');
+const express = require('express');
+const app = express();
+const PORT = 4369;
 
-async function receiveOrder() {
-    try {
-        // Membuka koneksi
-        const connection = await amqp.connect('amqp://localhost');
-        const channel = await connection.createChannel();
-        const queue = 'ticket_orders';
+app.use(express.json());
 
-        await channel.assertQueue(queue, { durable: false });
-        console.log(" [*] Menunggu pesanan tiket di queue %s...", queue);
+app.get('/health', (req, res) => res.json({ success: true, message: 'Notification Service aktif' }));
 
-        // Mendengarkan pesan dari queue
-        channel.consume(queue, (msg) => {
-            if (msg !== null) {
-                const order = JSON.parse(msg.content.toString());
-                console.log(" [v] Notifikasi: Pesanan Tiket Diterima!", order);
-            }
-        }, { noAck: true });
-    } catch (error) {
-        console.error('Error receiving message:', error);
-    }
-}
-
-receiveOrder();
+app.listen(PORT, () => console.log(`Notification Service berjalan di port ${PORT}`));
